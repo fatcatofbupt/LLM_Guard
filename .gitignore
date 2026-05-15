@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# Model weights (large binary files)
+models/**/*.safetensors
+models/**/*.bin
+models/**/*.pt
+models/**/*.pth
+models/**/*.ckpt
+models/**/*.gguf
+models/**/model.safetensors
+
+# Training outputs
+finetune_qwen3guard/output/
+finetune_qwen3guard/**/output/
+finetune_qwen3guard/**/checkpoints/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Claude settings
+.claude/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data files that should not be committed (optional, uncomment if needed)
+# docs/*.xlsx
+# docs/*.json
