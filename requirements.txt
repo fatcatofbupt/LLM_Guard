@@ -1,0 +1,16 @@
+# Core inference
+transformers>=4.51.0
+torch
+tqdm
+
+# Fine-tuning (LoRA)
+datasets
+peft
+trl
+unsloth
+
+# Web service (safety_service.py)
+fastapi
+uvicorn
+openai
+loguru

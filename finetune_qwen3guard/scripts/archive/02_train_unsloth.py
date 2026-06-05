@@ -1,12 +1,30 @@
 #!/usr/bin/env python3
 """
 Qwen3Guard-Gen-0.6B Unsloth LoRA 微调脚本
+"""
+import signal, os, sys, time, traceback
 
-优势（vs 标准 Transformers + PEFT）：
-- 2x 训练速度
-- 70% 显存节省
-- 支持更长的上下文（8x）
+KILL_LOG = open("finetune_kill.log", "a")
 
+def make_handler(name):
+    def handler(signum, frame):
+        msg = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Received {name} (signal {signum}), PID={os.getpid()}, PPID={os.getppid()}\n"
+        KILL_LOG.write(msg); KILL_LOG.flush()
+        traceback.print_stack(frame, file=KILL_LOG)
+        KILL_LOG.write("---\n"); KILL_LOG.flush()
+        sys.exit(1)
+    return handler
+
+for sig, name in [(signal.SIGTERM, "SIGTERM"), (signal.SIGINT, "SIGINT"),
+                  (signal.SIGHUP, "SIGHUP"), (signal.SIGUSR1, "SIGUSR1"),
+                  (signal.SIGUSR2, "SIGUSR2"), (signal.SIGQUIT, "SIGQUIT")]:
+    try: signal.signal(sig, make_handler(name))
+    except: pass
+
+KILL_LOG.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Script started, PID={os.getpid()}, PPID={os.getppid()}\n")
+KILL_LOG.flush()
+
+"""
 环境要求:
 - Linux + NVIDIA GPU (CUDA >= 11.8)
 - Python 3.10+
@@ -77,6 +95,7 @@ def main():
         load_in_8bit=False,
         full_finetuning=False,
         trust_remote_code=True,
+        local_files_only=True,   # 模型在本地，不访问 HuggingFace
     )
     print(f"       Model dtype: {model.dtype}")
     print(f"       Device: {next(model.parameters()).device}")
@@ -114,21 +133,30 @@ def main():
     val_dataset = Dataset.from_list(val_raw)
 
     # ------------------------------------------------------------------
-    # 4. 数据格式化: messages -> 应用 chat_template
+    # 4. 数据格式化: messages -> prompt + completion
+    #    必须使用 prompt/completion 格式，否则 SFTTrainer 会走
+    #    _collate_language_modeling 把整个文本都当 target 学
     # ------------------------------------------------------------------
-    print(f"[4/5] Preparing data formatter")
+    print(f"[4/5] Preparing data formatter (prompt + completion)")
 
-    def formatting_func(example):
-        return tokenizer.apply_chat_template(
-            example["messages"],
+    def build_prompt_completion(example):
+        user_msg = [m for m in example["messages"] if m["role"] == "user"]
+        assistant_msg = [m for m in example["messages"] if m["role"] == "assistant"]
+        prompt = tokenizer.apply_chat_template(
+            user_msg,
             tokenize=False,
-            add_generation_prompt=False,
+            add_generation_prompt=True,
         )
+        completion = assistant_msg[0]["content"] if assistant_msg else ""
+        return {"prompt": prompt, "completion": completion}
 
-    # 用一个样本验证输出格式
-    sample = formatting_func(train_raw[0])
-    print(f"       Sample input length: {len(sample)} chars")
-    print(f"       Sample preview:\n{sample[:400]}...")
+    train_dataset = train_dataset.map(build_prompt_completion, remove_columns=["messages"])
+    val_dataset = val_dataset.map(build_prompt_completion, remove_columns=["messages"])
+
+    # 验证一个样本
+    sample = train_dataset[0]
+    print(f"       Prompt length: {len(sample['prompt'])} chars")
+    print(f"       Completion: {sample['completion'][:100]}...")
 
     # ------------------------------------------------------------------
     # 5. 训练参数
@@ -159,15 +187,10 @@ def main():
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         args=training_args,
-        max_seq_length=args.max_seq_length,
-        formatting_func=formatting_func,
-        # Unsloth 会自动处理 completion-only loss masking
-        # 对于 Qwen3Guard，assistant 输出从 "Safety:" 开始
-        dataset_text_field=None,
     )
 
     # ------------------------------------------------------------------
