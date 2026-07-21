@@ -9,7 +9,7 @@ For Unsafe/Controversial: fills refusal message directly.
 Produces the final all_questiions_finished.xlsx.
 
 Usage (only after Stage 1 completes):
-    conda run -n py311 python3 batch_stage2_backend.py
+    conda run -n py311 python3 pipeline/batch_stage2_backend.py
 """
 
 import asyncio
@@ -24,9 +24,9 @@ from loguru import logger
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/.batch_stage1_results.pkl")
-INPUT_FILE = os.environ.get("INPUT_FILE", "all_questions.xlsx")
-OUTPUT_FILE = os.environ.get("OUTPUT_FILE", "all_questiions_finished.xlsx")
+STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/interim/.batch_stage1_results.pkl")
+INPUT_FILE = os.environ.get("INPUT_FILE", "questions/all_questions.xlsx")
+OUTPUT_FILE = os.environ.get("OUTPUT_FILE", "questions/all_questions_finished.xlsx")
 
 BACKEND_BASE_URL = "http://172.31.0.97:3391/v1"
 BACKEND_API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"

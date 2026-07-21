@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Prepare v5 training data using ALL three sheets from all_questions.xlsx.
+Prepare v5 training data using ALL three sheets from questions/all_questions.xlsx.
 
 Sheet rules:
   - 生成类: Unsafe (Categories: Unethical Acts)
@@ -20,7 +20,7 @@ import pandas as pd
 
 random.seed(42)
 
-INPUT_XLSX = "all_questions.xlsx"
+INPUT_XLSX = "questions/all_questions.xlsx"
 V3_TRAIN = "finetune_qwen3guard/data/train_v3.jsonl"
 V3_VAL = "finetune_qwen3guard/data/val_v3.jsonl"
 

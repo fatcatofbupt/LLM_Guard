@@ -25,6 +25,7 @@ venv/
 ENV/
 env/
 .venv/
+.xlsx_venv/
 
 # Model weights (large binary files)
 models/**/*.safetensors
@@ -35,11 +36,13 @@ models/**/*.ckpt
 models/**/*.gguf
 models/**/model.safetensors
 
-# Training outputs
+# Training outputs / intermediate artifacts
 finetune_qwen3guard/output/
 finetune_qwen3guard/**/output/
 finetune_qwen3guard/**/checkpoints/
 *.log
+*.pkl
+.safety_service.pid
 
 # IDE
 .vscode/

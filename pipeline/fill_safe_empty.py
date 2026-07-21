@@ -4,7 +4,7 @@ Answer the 20 Safe-but-empty questions directly via the backend LLM API.
 Update the final merged Excel in-place.
 
 Usage:
-    conda run -n guard_train python3 fill_safe_empty.py
+    conda run -n guard_train python3 pipeline/fill_safe_empty.py
 """
 
 import json
@@ -17,7 +17,7 @@ import pandas as pd
 # ------------------------------------------------------------------
 # Config
 # ------------------------------------------------------------------
-FINAL_FILE = "data/附件5_天津测试题_最终合并结果.xlsx"
+FINAL_FILE = "data/raw/附件5_天津测试题_最终合并结果.xlsx"
 
 API_BASE = "http://172.31.0.13:33890/v1"
 API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"

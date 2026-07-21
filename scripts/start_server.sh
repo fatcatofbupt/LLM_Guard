@@ -10,7 +10,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 PIDFILE=".safety_service.pid"
 LOGFILE="logs/safety_service.log"
@@ -49,9 +50,9 @@ check_gpu() {
 }
 
 check_model() {
-    if [ ! -d "finetune_qwen3guard/output/unsloth_lora_v2/merged_model" ]; then
+    if [ ! -d "finetune_qwen3guard/output/lora_v5_1/merged_model" ]; then
         echo "[error] Fine-tuned model not found at:"
-        echo "  finetune_qwen3guard/output/unsloth_lora_v2/merged_model"
+        echo "  finetune_qwen3guard/output/lora_v5_1/merged_model"
         echo "[hint] Check the model path or run merge_adapter.py first."
         exit 1
     fi
@@ -71,7 +72,7 @@ start_foreground() {
 
     export PYTHONUNBUFFERED=1
     export CUDA_VISIBLE_DEVICES=3
-    exec $PYTHON safety_service.py
+    exec $PYTHON scripts/services/safety_service.py
 }
 
 start_daemon() {
@@ -117,7 +118,7 @@ start_daemon() {
     export PYTHONUNBUFFERED=1
     export CUDA_VISIBLE_DEVICES=3
 
-    CUDA_VISIBLE_DEVICES=3 nohup $PYTHON safety_service.py > "$LOGFILE" 2>&1 &
+    CUDA_VISIBLE_DEVICES=3 nohup $PYTHON scripts/services/safety_service.py > "$LOGFILE" 2>&1 &
     echo $! > "$PIDFILE"
 
     sleep 2

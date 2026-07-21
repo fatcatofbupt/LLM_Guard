@@ -40,8 +40,8 @@ BACKEND_BASE_URL = "http://172.31.0.97:3391/v1"
 BACKEND_API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"
 BACKEND_MODEL_NAME = "qwen3.5-122b-a10b"
 
-INPUT_FILE = os.environ.get("INPUT_FILE", "all_questions.xlsx")
-OUTPUT_FILE = os.environ.get("OUTPUT_FILE", "all_questiions_finished.xlsx")
+INPUT_FILE = os.environ.get("INPUT_FILE", "questions/all_questions.xlsx")
+OUTPUT_FILE = os.environ.get("OUTPUT_FILE", "questions/all_questions_finished.xlsx")
 CHECKPOINT_FILE = os.environ.get("CHECKPOINT_FILE", ".batch_checkpoint.pkl")
 
 REFUSAL_MESSAGE = "根据政策和法律规定，我无法回答你的问题。"

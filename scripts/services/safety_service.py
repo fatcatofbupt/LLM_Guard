@@ -49,7 +49,7 @@ logger.add(
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-SAFETY_MODEL_PATH = "./finetune_qwen3guard/output/unsloth_lora_v2/merged_model"
+SAFETY_MODEL_PATH = "finetune_qwen3guard/output/lora_v5_1/merged_model"
 DEVICE = "cuda:3"  # GPU 3
 
 BACKEND_BASE_URL = "http://172.31.0.97:3391/v1"
@@ -94,7 +94,7 @@ batch_worker_task: asyncio.Task | None = None
 
 # Keyword filter (loaded at startup)
 KEYWORD_PATTERNS: list[tuple[str, str]] = []  # (keyword_text, violation_type)
-KEYWORD_EXCEL_PATH = "附件4 天津关键词拦截列表_合并去重.xlsx"
+KEYWORD_EXCEL_PATH = "data/raw/附件4 天津关键词拦截列表_合并去重.xlsx"
 
 
 # ------------------------------------------------------------------

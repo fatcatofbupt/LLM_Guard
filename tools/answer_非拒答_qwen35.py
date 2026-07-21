@@ -9,7 +9,7 @@ This ensures the model is not overloaded while production jobs are running.
 Supports checkpoint/resume. Saves results to a new Excel file.
 
 Usage:
-    conda run -n guard_train python3 answer_非拒答_qwen35.py
+    conda run -n guard_train python3 tools/answer_非拒答_qwen35.py
 """
 
 import json
@@ -24,8 +24,8 @@ import pandas as pd
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-INPUT_FILE = "data/附件5 天津测试题_合并去重.xlsx"
-OUTPUT_FILE = "data/附件5 天津测试题_合并去重_已回答.xlsx"
+INPUT_FILE = "data/raw/附件5 天津测试题_合并去重.xlsx"
+OUTPUT_FILE = "data/reference/附件5 天津测试题_合并去重_已回答.xlsx"
 SHEET_NAME = "非拒答"
 
 API_BASE = "http://172.31.0.13:33890/v1"

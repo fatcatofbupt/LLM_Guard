@@ -11,16 +11,16 @@ There is no build system, no test framework, and no package manifest — everyth
 ## Run
 
 ```bash
-python3 hello_qwen3guard.py
+conda run -n py311 python3 scripts/demos/hello_qwen3guard.py
 ```
 
-This is the only entry point. It loads the model from the **local path** `./models/Qwen/Qwen3Guard-Gen-0.6B` (not from Hugging Face Hub — the weights are vendored under `models/`, ~1.5 GB safetensors). Device selection is automatic: `cuda` → `mps` → `cpu`.
+This is the main demo entry point. It loads the model from the **local path** `models/Qwen/Qwen3Guard-Gen-0.6B` (not from Hugging Face Hub — the weights are vendored under `models/`, ~1.5 GB safetensors). Device selection is automatic: `cuda` → `mps` → `cpu`.
 
-Requires `transformers>=4.51.0` and `torch`. There is no `requirements.txt`; install ad-hoc.
+Requires `transformers>=4.51.0` and `torch`. Use `bash scripts/install_deps.sh` or `pip install -r requirements.txt`.
 
 ## Architecture
 
-### `hello_qwen3guard.py`
+### `scripts/demos/hello_qwen3guard.py`
 
 Two-function pipeline:
 

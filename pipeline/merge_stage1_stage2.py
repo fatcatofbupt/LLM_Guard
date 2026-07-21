@@ -8,7 +8,7 @@ Logic:
   - Any Safe rows with empty Stage 2 answers are listed for the user.
 
 Usage:
-    conda run -n guard_train python3 merge_stage1_stage2.py
+    conda run -n guard_train python3 pipeline/merge_stage1_stage2.py
 """
 
 import pandas as pd
@@ -16,9 +16,9 @@ import pandas as pd
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-STAGE1_FILE = "stage1_v5_1_raw.xlsx"
-STAGE2_FILE = "data/附件5 天津测试题_合并去重_已回答.xlsx"
-OUTPUT_FILE = "data/附件5_天津测试题_最终合并结果.xlsx"
+STAGE1_FILE = "questions/stage1_v5_1_raw.xlsx"
+STAGE2_FILE = "data/reference/附件5 天津测试题_合并去重_已回答.xlsx"
+OUTPUT_FILE = "data/raw/附件5_天津测试题_最终合并结果.xlsx"
 
 REFUSAL_MESSAGE = "根据政策和法律规定，我无法回答你的问题。"
 

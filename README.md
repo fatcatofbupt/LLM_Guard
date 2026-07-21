@@ -34,21 +34,35 @@ LLM_Guard/
 ├── CLAUDE.md                          # Claude Code 项目指令
 ├── requirements.txt                   # Python 依赖
 │
-├── all_questions.xlsx                 # 输入数据（47,772 条问题，3 个 sheet）
-├── stage1_review.xlsx                 # Stage 1 最终结果（含 safety_label, categories）
+├── pipeline/                          # 主两阶段处理脚本
+│   ├── batch_stage1_safety.py         # Stage 1: 安全模型推理
+│   ├── batch_stage2_backend.py        # Stage 2: 后端 API 调用
+│   ├── export_stage1_for_review.py    # 将 Stage 1 结果导出为 Excel
+│   ├── merge_stage1_stage2.py         # 合并 Stage 1 + Stage 2 结果
+│   ├── fill_safe_empty.py             # 对 Safe 但答案为空的行补调后端 API
+│   ├── process_0721_stage2.py         # 0721 新版测试题 Stage 2 填充
+│   └── fill_remaining_0721.py         # 0721 剩余空行回填
 │
-├── batch_stage1_safety.py             # Stage 1: 安全模型推理
-├── batch_stage2_backend.py            # Stage 2: 后端 API 调用
-├── export_stage1_for_review.py        # 将 Stage 1 结果导出为 Excel
-│
-├── answer_非拒答_qwen35.py            # 用户手动运行中（非拒答 sheet 处理）
+├── tools/                             # 用户手动运行的 ad-hoc 工具
+│   └── answer_非拒答_qwen35.py        # 用户手动运行中（非拒答 sheet 处理）
 │
 ├── data/                              # 数据与中间结果
-│   ├── .batch_stage1_results.pkl      # Stage 1 原始推理结果（pickle）
-│   ├── 附件4_原始备份.xlsx
-│   ├── 附件4 天津关键词拦截列表_合并去重.xlsx
-│   ├── 附件5 天津测试题_合并去重.xlsx
-│   └── 附件5 天津测试题_合并去重_已回答.xlsx
+│   ├── interim/                       # Stage 1 原始推理结果（pickle）
+│   │   └── .batch_stage1_results.pkl
+│   ├── raw/                           # 原始输入数据
+│   │   ├── 附件4_原始备份.xlsx
+│   │   ├── 附件4 天津关键词拦截列表_合并去重.xlsx
+│   │   ├── 附件5 天津测试题_合并去重.xlsx
+│   │   └── 附件5_天津测试题_最终合并结果.xlsx
+│   └── reference/                     # 用于拷贝答案的历史已回答文件
+│       └── 附件5 天津测试题_合并去重_已回答.xlsx
+│
+├── questions/                         # 问题工作簿（输入 + Stage 输出）
+│   ├── all_questions.xlsx             # 主输入数据（47,772 条问题，3 个 sheet）
+│   ├── 0721-附件5_测试题.xlsx
+│   ├── 0721-附件5_测试题_已回答.xlsx
+│   ├── stage1_review.xlsx             # Stage 1 最终结果（含 safety_label, categories）
+│   └── stage1_v5_1_raw.xlsx           # Stage 1 原始结果（带后处理）
 │
 ├── models/                            # 本地模型权重
 │   └── Qwen/
@@ -70,13 +84,15 @@ LLM_Guard/
 │       └── test_merged_model.py       # 模型验证脚本
 │
 ├── scripts/                           # 辅助脚本与入口
-│   ├── hello_qwen3guard.py            # 单条问题快速测试 demo
-│   ├── safety_service.py              # 服务化入口
-│   ├── batch_process_two_stage.py     # 两阶段合一（旧版参考）
-│   ├── run.sh
-│   ├── run_finetune.sh
-│   ├── smoke_test.sh
-│   └── ...
+│   ├── install.sh / install_deps.sh   # 依赖安装
+│   ├── run_finetune.sh / smoke_test.sh# 训练包装脚本
+│   ├── start_server.sh                # 服务启停脚本
+│   ├── demos/
+│   │   └── hello_qwen3guard.py        # 单条问题快速测试 demo
+│   ├── services/
+│   │   └── safety_service.py          # 服务化入口
+│   └── archive/
+│       └── batch_process_two_stage.py # 两阶段合一（旧版参考）
 │
 ├── docs/                              # 评估语料和文档
 ├── results/                           # 历史结果存档
@@ -98,33 +114,33 @@ conda run -n py311 python3 <script>.py
 ### Stage 1: 安全模型推理
 
 ```bash
-conda run -n py311 python3 batch_stage1_safety.py
+conda run -n py311 python3 pipeline/batch_stage1_safety.py
 ```
 
 - 加载 `finetune_qwen3guard/output/lora_v5_1/merged_model`
-- 处理 `all_questions.xlsx` 全部 3 个 sheet
-- 输出 `data/.batch_stage1_results.pkl`
-- 自动生成 `stage1_review.xlsx`（运行 `export_stage1_for_review.py`）
+- 处理 `questions/all_questions.xlsx` 全部 3 个 sheet
+- 输出 `data/interim/.batch_stage1_results.pkl`
+- 自动生成 `questions/stage1_review.xlsx`（运行 `pipeline/export_stage1_for_review.py`）
 
 ### Stage 2: 后端 API 调用
 
 > ⚠️ **仅在 Stage 1 完成后运行，且需用户确认**
 
 ```bash
-conda run -n py311 python3 batch_stage2_backend.py
+conda run -n py311 python3 pipeline/batch_stage2_backend.py
 ```
 
 - 读取 Stage 1 结果
 - **Safe** 问题 → 调用后端 `qwen3.5-122b-a10b` API
 - **Unsafe/Controversial** → 填入拒绝消息
-- 输出 `all_questiions_finished.xlsx`
+- 输出 `questions/all_questions_finished.xlsx`
 
 ---
 
 ## 单条测试
 
 ```bash
-conda run -n py311 python3 scripts/hello_qwen3guard.py
+conda run -n py311 python3 scripts/demos/hello_qwen3guard.py
 ```
 
 直接加载 v5.1 模型，对单条问题进行安全分类。
@@ -149,7 +165,7 @@ conda run -n py311 python3 scripts/hello_qwen3guard.py
 ### batch_stage1_safety.py
 
 ```python
-SAFETY_MODEL_PATH = "./finetune_qwen3guard/output/lora_v5_1/merged_model"
+SAFETY_MODEL_PATH = "finetune_qwen3guard/output/lora_v5_1/merged_model"
 DEVICE = "cuda:0"
 SAFETY_BATCH_SIZE = 32
 ```
@@ -168,4 +184,4 @@ BACKEND_CONCURRENCY = 16
 
 - 模型从 **本地路径** 加载，不从 Hugging Face Hub 下载
 - 基础模型权重位于 `models/Qwen/Qwen3Guard-Gen-0.6B/` (~1.5 GB)
-- `answer_非拒答_qwen35.py` 由用户手动运行，**请勿修改**
+- `tools/answer_非拒答_qwen35.py` 由用户手动运行，**请勿修改**

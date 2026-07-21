@@ -8,7 +8,7 @@ all_questions.xlsx through it. Saves intermediate results to disk.
 Does NOT call the backend API.
 
 Usage:
-    conda run -n py311 python3 batch_stage1_safety.py
+    conda run -n py311 python3 pipeline/batch_stage1_safety.py
 """
 
 import os
@@ -25,11 +25,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-SAFETY_MODEL_PATH = "./finetune_qwen3guard/output/lora_v5_1/merged_model"
+SAFETY_MODEL_PATH = "finetune_qwen3guard/output/lora_v5_1/merged_model"
 DEVICE = "cuda:0"
 
-INPUT_FILE = os.environ.get("INPUT_FILE", "all_questions.xlsx")
-STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/.batch_stage1_results.pkl")
+INPUT_FILE = os.environ.get("INPUT_FILE", "questions/all_questions.xlsx")
+STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/interim/.batch_stage1_results.pkl")
 
 SAFETY_BATCH_SIZE = 32
 MAX_NEW_TOKENS = 128

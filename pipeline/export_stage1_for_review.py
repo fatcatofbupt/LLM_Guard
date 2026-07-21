@@ -16,9 +16,9 @@ import pickle
 import pandas as pd
 from loguru import logger
 
-STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/.batch_stage1_results.pkl")
-INPUT_FILE = os.environ.get("INPUT_FILE", "all_questions.xlsx")
-REVIEW_FILE = os.environ.get("REVIEW_FILE", "stage1_review.xlsx")
+STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/interim/.batch_stage1_results.pkl")
+INPUT_FILE = os.environ.get("INPUT_FILE", "questions/all_questions.xlsx")
+REVIEW_FILE = os.environ.get("REVIEW_FILE", "questions/stage1_review.xlsx")
 
 
 def main():
