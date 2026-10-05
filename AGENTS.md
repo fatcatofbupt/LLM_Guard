@@ -299,6 +299,25 @@ conda run -n py311 python3 finetune_qwen3guard/scripts/test_merged_model.py
 
 ## 9. 部署注意事项
 
+### 9.0 当前环境（2026-10-05 更新）
+
+**后端模型（2026-10-05 实测可用）**
+
+- 服务：阿里云 PAI-EAS vLLM，服务名 `vllm_ai_call_prod_qwen3_6_35b_a3b_01`
+- 模型名：`LegalBrain`（请求 model 字段必须用它，不是 URL 里的服务名）
+- 公网地址（本机使用）：`http://gw-ex94q3r70pfyvde6lc.cn-wulanchabu.pai-eas.aliyuncs.com/api/predict/vllm_ai_call_prod_qwen3_6_35b_a3b_01/v1`
+- 内网地址（同地域服务器使用，更快）：`http://gw-ex94q3r70pfyvde6lc-vpc.cn-wulanchabu.pai-eas.aliyuncs.com/api/predict/vllm_ai_call_prod_qwen3_6_35b_a3b_01/v1`
+- API Key：只存放在本地 `config.toml`（已 gitignore），**不要写进入库文件**
+- 特性：思考型模型，用 `chat_template_kwargs.enable_thinking` 控制思考模式，默认关闭；base_url 必须以 `/v1` 结尾；鉴权用 `Authorization: Bearer <key>`
+
+**GPU 服务器**
+
+- 连接：`ssh tts@112.45.47.21`（免密登录，已配置好）
+- 用途：模型权重下载、Stage 1 安全判定推理、LoRA 微调训练
+- 注意：`112.45.47.21` 是公网 IP
+
+### 原注意事项
+
 - **GPU 要求**：推理需要 NVIDIA GPU；训练脚本默认使用 `CUDA_VISIBLE_DEVICES=3`（`02_train_lora.py` 第 12 行，可在 shell 中导出该变量覆盖）。部署前确认 GPU 编号。
 - **后端 API**：所有后端模型访问统一从根目录 `config.toml` 读取（模板 `config.example.toml`，`config.toml` 已 gitignore 不入库）。读取入口 `llm_guard_config.get_backend_config()`；`enable_thinking` 控制后端思考模式，默认 `false`（直接回答，不输出推理过程）。涉及脚本：`pipeline/batch_stage2_backend.py`、`pipeline/fill_safe_empty.py`、`pipeline/fill_remaining_0721.py`、`scripts/services/safety_service.py`、`tools/answer_非拒答_qwen35.py`。旧内网地址（172.31.0.97:3391 / 172.31.0.13:33890）与旧模型 `qwen3.5-122b-a10b` 已失效移除。
 - **API Key**：API Key 只存放在本地 `config.toml`（已 gitignore），代码中不再硬编码。注意 `scripts/archive/batch_process_two_stage.py` 仍留有旧 Key 明文，属归档历史，不再使用。
