@@ -26,6 +26,30 @@
 
 ---
 
+## 运行环境（2026-10 更新）
+
+**后端大模型（Stage 2 答案生成，已实测可用）**
+
+- 服务：阿里云 PAI-EAS vLLM；请求 `model` 字段必须用 `LegalBrain`（不是 URL 里的服务名）
+- 配置方式：所有后端访问统一从根目录 `config.toml` 读取（模板 `config.example.toml`）；`config.toml` 已 gitignore，API Key 只存放在这个本地文件里
+- 关键字段：`base_url`（公网/内网地址见 `config.toml` 注释，必须以 `/v1` 结尾）、`api_key`、`model_name`、`enable_thinking`
+- 特性：思考型模型，通过 `enable_thinking` 控制思考模式，默认关闭（直接回答）
+
+**GPU 服务器**
+
+- 连接：`ssh tts@112.45.47.21`（免密登录）
+- 配置：4× RTX 4090；现有服务常驻各 GPU，本项目的批量任务固定用 GPU1（`CUDA_VISIBLE_DEVICES=1`），不影响在跑的服务
+- conda 位置：`~/miniconda3`；项目环境名：`py311`
+
+**下载与安装加速（中国大陆源）**
+
+- 模型权重：从 ModelScope 下载，例如：
+  `curl -L -o model.safetensors "https://modelscope.cn/models/Qwen/Qwen3Guard-Gen-0.6B/resolve/master/model.safetensors"`
+- pip：清华 Tuna 镜像 `-i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple`
+- conda：服务器 `~/.condarc` 已配置 Tuna anaconda 频道
+
+---
+
 ## 文件结构
 
 ```
