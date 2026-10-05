@@ -44,6 +44,9 @@ finetune_qwen3guard/**/checkpoints/
 *.pkl
 .safety_service.pid
 
+# Sync monitor runtime state
+sync_monitor.state
+
 # IDE
 .vscode/
 .idea/

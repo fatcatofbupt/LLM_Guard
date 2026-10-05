@@ -1,0 +1,14 @@
+# Unsloth 核心（会自动安装兼容版本的 transformers / torch 等）
+unsloth
+
+# 训练框架
+trl<0.15.0
+peft
+accelerate
+bitsandbytes
+
+# 数据处理
+datasets
+
+# 进度条、日志
+tqdm
