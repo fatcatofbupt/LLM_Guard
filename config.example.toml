@@ -1,0 +1,21 @@
+# LLM_Guard 全局配置
+#
+# 用法:
+#   cp config.example.toml config.toml
+#   填入下面的值即可。config.toml 已被 gitignore，不会提交，可放心存放 API Key。
+#
+# 所有访问后端模型的脚本（pipeline/ 下的批量脚本、scripts/services/ 服务、
+# tools/ 下的工具）都从这里读取，代码中不再硬编码。
+
+[backend]
+# OpenAI 兼容接口地址，必须包含 /v1。例如 "http://192.168.1.10:3391/v1"
+base_url = ""
+
+# 后端模型的访问密钥
+api_key = ""
+
+# 模型名
+model_name = ""
+
+# 是否开启思考模式（推理过程会消耗更多 token 和时间）。默认 false = 直接回答
+enable_thinking = false

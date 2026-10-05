@@ -19,9 +19,17 @@ import pandas as pd
 # ------------------------------------------------------------------
 FINAL_FILE = "data/raw/附件5_天津测试题_最终合并结果.xlsx"
 
-API_BASE = "http://172.31.0.13:33890/v1"
-API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"
-MODEL_NAME = "qwen3.5-122b-a10b"
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from llm_guard_config import get_backend_config
+
+_BACKEND = get_backend_config()
+API_BASE = _BACKEND["base_url"]
+API_KEY = _BACKEND["api_key"]
+MODEL_NAME = _BACKEND["model_name"]
+ENABLE_THINKING = _BACKEND["enable_thinking"]
 
 MAX_TOKENS = 2048
 REQUEST_TIMEOUT = 120
@@ -39,7 +47,7 @@ def call_api(question: str) -> str:
         "messages": [{"role": "user", "content": question}],
         "max_tokens": MAX_TOKENS,
         "stream": False,
-        "chat_template_kwargs": {"enable_thinking": False},
+        "chat_template_kwargs": {"enable_thinking": ENABLE_THINKING},
     }, ensure_ascii=False).encode("utf-8")
 
     req = urllib.request.Request(url, method="POST", data=payload)

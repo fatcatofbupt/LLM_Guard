@@ -299,9 +299,9 @@ conda run -n py311 python3 finetune_qwen3guard/scripts/test_merged_model.py
 
 ## 9. 部署注意事项
 
-- **GPU 要求**：推理需要 NVIDIA GPU；训练脚本默认使用 `CUDA_VISIBLE_DEVICES=3`（`02_train_lora.py` 第 11 行）。部署前确认 GPU 编号。
-- **后端 API**：`pipeline/batch_stage2_backend.py` 和 `scripts/services/safety_service.py` 都调用内网后端 `http://172.31.0.97:3391/v1`，模型名为 `qwen3.5-122b-a10b`。该地址是项目特定环境的一部分，迁移时需修改。
-- **API Key**：后端 API Key 硬编码在 `pipeline/batch_stage2_backend.py`、`scripts/services/safety_service.py`、`tools/answer_非拒答_qwen35.py`、`pipeline/fill_safe_empty.py` 中。生产部署应改为环境变量或密钥管理。
+- **GPU 要求**：推理需要 NVIDIA GPU；训练脚本默认使用 `CUDA_VISIBLE_DEVICES=3`（`02_train_lora.py` 第 12 行，可在 shell 中导出该变量覆盖）。部署前确认 GPU 编号。
+- **后端 API**：所有后端模型访问统一从根目录 `config.toml` 读取（模板 `config.example.toml`，`config.toml` 已 gitignore 不入库）。读取入口 `llm_guard_config.get_backend_config()`；`enable_thinking` 控制后端思考模式，默认 `false`（直接回答，不输出推理过程）。涉及脚本：`pipeline/batch_stage2_backend.py`、`pipeline/fill_safe_empty.py`、`pipeline/fill_remaining_0721.py`、`scripts/services/safety_service.py`、`tools/answer_非拒答_qwen35.py`。旧内网地址（172.31.0.97:3391 / 172.31.0.13:33890）与旧模型 `qwen3.5-122b-a10b` 已失效移除。
+- **API Key**：API Key 只存放在本地 `config.toml`（已 gitignore），代码中不再硬编码。注意 `scripts/archive/batch_process_two_stage.py` 仍留有旧 Key 明文，属归档历史，不再使用。
 - **关键词过滤**：`scripts/services/safety_service.py` 包含一个从 `data/raw/附件4 天津关键词拦截列表_合并去重.xlsx` 加载的关键词预过滤模块，但当前代码中 `keyword_hit=False` 被硬编码关闭。修改前请确认业务需求。
 
 ---
@@ -317,7 +317,7 @@ conda run -n py311 python3 finetune_qwen3guard/scripts/test_merged_model.py
 
 ## 11. 安全注意事项
 
-- 后端 API Key 以明文形式出现在多个脚本中。修改或提交前注意不要泄露到公共仓库。
+- 填好 Key 的 `config.toml` 不要提交或外发（已 gitignore）。旧 Key 已失效；若新 Key 泄露，需立即更换并通知所有使用方。
 - 安全模型输出是自由文本，依赖正则解析。修改解析逻辑时务必对照 `models/Qwen/Qwen3Guard-Gen-0.6B/README.md` 中的官方示例，避免破坏分类正确性。
 - `batch_stage2_backend.py` 会向内网发送大量用户问题，运行前需确认网络可达和权限。
 - 关键词过滤模块当前被显式关闭；如启用，需评估对正常请求的误拦截风险。
@@ -328,6 +328,6 @@ conda run -n py311 python3 finetune_qwen3guard/scripts/test_merged_model.py
 
 - [ ] 确认要使用的模型路径在磁盘上真实存在。
 - [ ] 若修改安全输出解析正则，同步所有引用该正则的脚本。
-- [ ] 若修改后端 API 地址或 Key，同步 `pipeline/batch_stage2_backend.py`、`scripts/services/safety_service.py`、`tools/answer_非拒答_qwen35.py`、`pipeline/fill_safe_empty.py`。
+- [ ] 若更换后端 API 地址、Key 或模型名，只需修改根目录 `config.toml` 一处。
 - [ ] 不要修改 `tools/answer_非拒答_qwen35.py` 除非用户明确要求。
 - [ ] 运行修改后先用 `scripts/demos/hello_qwen3guard.py` 或 `finetune_qwen3guard/scripts/test_merged_model.py` 做冒烟验证。

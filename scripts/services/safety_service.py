@@ -52,9 +52,16 @@ logger.add(
 SAFETY_MODEL_PATH = "finetune_qwen3guard/output/lora_v5_1/merged_model"
 DEVICE = "cuda:3"  # GPU 3
 
-BACKEND_BASE_URL = "http://172.31.0.97:3391/v1"
-BACKEND_API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"
-BACKEND_MODEL_NAME = "qwen3.5-122b-a10b"
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from llm_guard_config import get_backend_config
+
+_BACKEND = get_backend_config()
+BACKEND_BASE_URL = _BACKEND["base_url"]
+BACKEND_API_KEY = _BACKEND["api_key"]
+BACKEND_MODEL_NAME = _BACKEND["model_name"]
+BACKEND_ENABLE_THINKING = _BACKEND["enable_thinking"]
 
 SERVICE_HOST = "0.0.0.0"
 SERVICE_PORT = 32469
@@ -412,6 +419,7 @@ async def chat_completions(req: ChatCompletionRequest):
                     model=BACKEND_MODEL_NAME,
                     messages=backend_messages,
                     stream=True,
+                    extra_body={"chat_template_kwargs": {"enable_thinking": BACKEND_ENABLE_THINKING}},
                 )
             )
 
@@ -453,6 +461,7 @@ async def chat_completions(req: ChatCompletionRequest):
                 backend_client.chat.completions.create(
                     model=BACKEND_MODEL_NAME,
                     messages=backend_messages,
+                    extra_body={"chat_template_kwargs": {"enable_thinking": BACKEND_ENABLE_THINKING}},
                 )
             )
 

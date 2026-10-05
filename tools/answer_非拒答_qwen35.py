@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Answer all questions in the '非拒答' sheet of 附件5 天津测试题_合并去重.xlsx
-using the qwen3.5-122b-a10b model via OpenAI-compatible API.
+using the backend model configured in config.toml (OpenAI-compatible API).
 
 SEQUENTIAL mode: one request at a time, no concurrency.
 This ensures the model is not overloaded while production jobs are running.
@@ -28,9 +28,14 @@ INPUT_FILE = "data/raw/附件5 天津测试题_合并去重.xlsx"
 OUTPUT_FILE = "data/reference/附件5 天津测试题_合并去重_已回答.xlsx"
 SHEET_NAME = "非拒答"
 
-API_BASE = "http://172.31.0.13:33890/v1"
-API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"
-MODEL_NAME = "qwen3.5-122b-a10b"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from llm_guard_config import get_backend_config
+
+_BACKEND = get_backend_config()
+API_BASE = _BACKEND["base_url"]
+API_KEY = _BACKEND["api_key"]
+MODEL_NAME = _BACKEND["model_name"]
+ENABLE_THINKING = _BACKEND["enable_thinking"]
 
 MAX_TOKENS = 2048
 REQUEST_TIMEOUT = 120          # seconds per API call
@@ -60,7 +65,7 @@ def call_api(question: str) -> str:
         "messages": [{"role": "user", "content": question}],
         "max_tokens": MAX_TOKENS,
         "stream": False,
-        "chat_template_kwargs": {"enable_thinking": False},
+        "chat_template_kwargs": {"enable_thinking": ENABLE_THINKING},
     }, ensure_ascii=False).encode("utf-8")
 
     req = urllib.request.Request(url, method="POST", data=payload)

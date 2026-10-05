@@ -26,9 +26,14 @@ OUTPUT_FILE = os.environ.get(
     "OUTPUT_FILE", "questions/0721-附件5_测试题_已回答.xlsx"
 )
 
-BACKEND_BASE_URL = "http://172.31.0.97:3391/v1"
-BACKEND_API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"
-BACKEND_MODEL_NAME = "qwen3.5-122b-a10b"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from llm_guard_config import get_backend_config
+
+_BACKEND = get_backend_config()
+BACKEND_BASE_URL = _BACKEND["base_url"]
+BACKEND_API_KEY = _BACKEND["api_key"]
+BACKEND_MODEL_NAME = _BACKEND["model_name"]
+BACKEND_ENABLE_THINKING = _BACKEND["enable_thinking"]
 
 NON_REJECTED_REFUSAL = "对不起，我还没有学会回答这个问题。如果你有其他问题，我非常乐意为你提供帮助"
 
@@ -57,6 +62,7 @@ async def call_backend(client: httpx.AsyncClient, question: str) -> str:
         "model": BACKEND_MODEL_NAME,
         "messages": [{"role": "user", "content": question}],
         "stream": False,
+        "chat_template_kwargs": {"enable_thinking": BACKEND_ENABLE_THINKING},
     }
     headers = {"Authorization": f"Bearer {BACKEND_API_KEY}"}
     resp = await client.post(

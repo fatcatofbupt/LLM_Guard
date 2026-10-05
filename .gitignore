@@ -47,6 +47,9 @@ finetune_qwen3guard/**/checkpoints/
 # Sync monitor runtime state
 sync_monitor.state
 
+# Local config (contains secrets, do not commit)
+config.toml
+
 # IDE
 .vscode/
 .idea/

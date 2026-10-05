@@ -3,7 +3,7 @@
 Stage 2: Backend API calls only.
 
 Reads Stage 1 safety results and the original Excel file.
-For Safe questions: calls backend qwen3.5-122b-a10b API.
+For Safe questions: calls backend LLM API (configured in config.toml).
 For Unsafe/Controversial: fills refusal message directly.
 
 Produces the final all_questiions_finished.xlsx.
@@ -28,9 +28,14 @@ STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/interim/.batch_stage1_resu
 INPUT_FILE = os.environ.get("INPUT_FILE", "questions/all_questions.xlsx")
 OUTPUT_FILE = os.environ.get("OUTPUT_FILE", "questions/all_questions_finished.xlsx")
 
-BACKEND_BASE_URL = "http://172.31.0.97:3391/v1"
-BACKEND_API_KEY = "JmpwFmQoEz6kBwSIFcAyl6b7q6XxPmbM"
-BACKEND_MODEL_NAME = "qwen3.5-122b-a10b"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from llm_guard_config import get_backend_config
+
+_BACKEND = get_backend_config()
+BACKEND_BASE_URL = _BACKEND["base_url"]
+BACKEND_API_KEY = _BACKEND["api_key"]
+BACKEND_MODEL_NAME = _BACKEND["model_name"]
+BACKEND_ENABLE_THINKING = _BACKEND["enable_thinking"]
 
 REFUSAL_MESSAGE = "根据政策和法律规定，我无法回答你的问题。"
 
@@ -59,6 +64,7 @@ async def call_backend(client: httpx.AsyncClient, question: str) -> str:
         "model": BACKEND_MODEL_NAME,
         "messages": [{"role": "user", "content": question}],
         "stream": False,
+        "chat_template_kwargs": {"enable_thinking": BACKEND_ENABLE_THINKING},
     }
     headers = {"Authorization": f"Bearer {BACKEND_API_KEY}"}
     resp = await client.post(
