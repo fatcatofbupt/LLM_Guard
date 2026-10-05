@@ -25,8 +25,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # ------------------------------------------------------------------
 # Configuration
 # ------------------------------------------------------------------
-SAFETY_MODEL_PATH = "finetune_qwen3guard/output/lora_v5_1/merged_model"
-DEVICE = "cuda:0"
+SAFETY_MODEL_PATH = os.environ.get("SAFETY_MODEL_PATH", "finetune_qwen3guard/output/lora_v5_1/merged_model")
+DEVICE = os.environ.get(
+    "DEVICE",
+    "cuda:0" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"),
+)
 
 INPUT_FILE = os.environ.get("INPUT_FILE", "questions/all_questions.xlsx")
 STAGE1_OUTPUT = os.environ.get("STAGE1_OUTPUT", "data/interim/.batch_stage1_results.pkl")
