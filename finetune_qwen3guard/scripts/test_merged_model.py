@@ -1,7 +1,12 @@
+import os
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL_PATH = "finetune_qwen3guard/output/unsloth_lora/merged_model"
+MODEL_PATH = os.environ.get(
+    "MERGED_MODEL_PATH",
+    "finetune_qwen3guard/output/lora_v5_1/merged_model",
+)
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 tok = AutoTokenizer.from_pretrained(MODEL_PATH)

@@ -8,7 +8,8 @@ Follows the exact same pattern as 02_train_unsloth.py:
   3. Save LoRA adapter + optional merged model
 """
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+# 默认用 3 号卡；在 shell 中导出 CUDA_VISIBLE_DEVICES 可覆盖（setup_remote.sh 依赖此行为）
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "3")
 
 import argparse
 import json
